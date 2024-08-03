@@ -25,6 +25,7 @@ import javax.annotation.Nonnull;
 public abstract class AbstractPipeGui<T extends AbstractPipeContainer<?>> extends AbstractContainerScreen<T> {
 
     protected static final ResourceLocation TEXTURE = new ResourceLocation(Facto.MODID, "textures/gui/pipe.png");
+    protected static final ResourceLocation BLANK_GUI = new ResourceLocation(Facto.MODID, "textures/gui/blank_gui.png");
     private final List<Tab> tabs = new ArrayList<>();
     private final ItemStack[] lastItems = new ItemStack[this.menu.tile.modules.getSlots()];
 
@@ -83,14 +84,7 @@ public abstract class AbstractPipeGui<T extends AbstractPipeContainer<?>> extend
 
     @Override
     protected void renderBg(@Nonnull GuiGraphics graphics, float partialTicks, int mouseX, int mouseY) {
-        graphics.fill(leftPos, topPos, leftPos + 176, topPos + 171, 0xFFFFFFFF);
-        graphics.vLine(leftPos, topPos, topPos + 171, 0xFFFF0000);
-        graphics.vLine(leftPos + 176, topPos, topPos + 171, 0xFFFF0000);
-        graphics.hLine(leftPos + 3, leftPos + 176, topPos, 0xFFFF0000);
-        graphics.hLine(leftPos + 2, leftPos + 2, topPos + 1, 0xFFFF0000);
-        graphics.hLine(leftPos + 1, leftPos + 1, topPos + 2, 0xFFFF0000);
-        graphics.hLine(leftPos, leftPos + 176, topPos + 171, 0xFFFF0000);
-        // graphics.blit(AbstractPipeGui.TEXTURE, this.leftPos, this.topPos + 32, 0, 0, 176, 171);
+        graphics.blit(AbstractPipeGui.BLANK_GUI, this.leftPos, this.topPos, 0, 0, 176, 171);
 
         // for (var tab : this.tabs)
         //     tab.draw(graphics);

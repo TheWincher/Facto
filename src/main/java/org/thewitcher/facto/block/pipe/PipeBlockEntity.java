@@ -78,7 +78,7 @@ public class PipeBlockEntity extends BlockEntity implements MenuProvider, IPipeC
         private int lastItemAmount;
         private int priority;
         private final LazyOptional<PipeBlockEntity> lazyThis = LazyOptional.of(() -> this);
-        private final Lazy<Integer> workRandomizer = Lazy.of(() -> this.level.random.nextInt(200));
+        private final Lazy<Integer> workRandomizer = Lazy.of(() -> level != null ? this.level.random.nextInt(200) : 0);
 
         public PipeBlockEntity(BlockPos pos, BlockState state) {
             super(Registry.pipeBlockEntity, pos, state);
