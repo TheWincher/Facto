@@ -53,7 +53,7 @@ public class PipeBlockEntity extends BlockEntity implements MenuProvider, IPipeC
 
         public final ItemStackHandler modules = new ItemStackHandler(1) {
             @Override
-            public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
+            public boolean isItemValid(int slot, ItemStack stack) {
                 var item = stack.getItem();
                 if (!(item instanceof IModule module))
                     return false;

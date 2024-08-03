@@ -31,13 +31,13 @@ public abstract class AbstractPipeContainer<T extends IModule> extends AbstractC
         this.moduleIndex = moduleIndex;
 
         // needs to be done here so transferStackInSlot works correctly, bleh
-        this.addSlots();
+        // this.addSlots();
 
-        for (var l = 0; l < 3; ++l)
-            for (var j1 = 0; j1 < 9; ++j1)
-                this.addSlot(new Slot(player.getInventory(), j1 + l * 9 + 9, 8 + j1 * 18, 89 + l * 18 + 32));
-        for (var i1 = 0; i1 < 9; ++i1)
-            this.addSlot(new Slot(player.getInventory(), i1, 8 + i1 * 18, 147 + 32));
+        // for (var l = 0; l < 3; ++l)
+        //     for (var j1 = 0; j1 < 9; ++j1)
+        //         this.addSlot(new Slot(player.getInventory(), j1 + l * 9 + 9, 8 + j1 * 18, 89 + l * 18 + 32));
+        // for (var i1 = 0; i1 < 9; ++i1)
+        //     this.addSlot(new Slot(player.getInventory(), i1, 8 + i1 * 18, 147 + 32));
     }
 
     protected abstract void addSlots();

@@ -1,7 +1,8 @@
 package org.thewitcher.facto.container;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.tabs.Tab;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
@@ -18,6 +19,8 @@ import org.thewitcher.facto.packets.PacketHandler;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.annotation.Nonnull;
 
 public abstract class AbstractPipeGui<T extends AbstractPipeContainer<?>> extends AbstractContainerScreen<T> {
 
@@ -54,8 +57,10 @@ public abstract class AbstractPipeGui<T extends AbstractPipeContainer<?>> extend
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+    public void render(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        
         this.renderBackground(graphics);
+        
         super.render(graphics, mouseX, mouseY, partialTicks);
         for (var widget : this.renderables) {
             // TDOO render widget tooltips?
@@ -68,25 +73,33 @@ public abstract class AbstractPipeGui<T extends AbstractPipeContainer<?>> extend
     }
 
     @Override
-    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        graphics.drawString(this.font, this.playerInventoryTitle.getString(), 8, this.imageHeight - 96 + 2, 4210752, false);
-        graphics.drawString(this.font, this.title.getString(), 8, 6 + 32, 4210752, false);
-        for (var tab : this.tabs)
-            tab.drawForeground(graphics, mouseX, mouseY);
+    protected void renderLabels(@Nonnull GuiGraphics graphics, int mouseX, int mouseY) {
+        graphics.drawString(this.font, title, 50, 10, 50);
+        // graphics.drawString(this.font, this.playerInventoryTitle.getString(), 8, this.imageHeight - 96 + 2, 4210752, false);
+        // graphics.drawString(this.font, this.title.getString(), 8, 6 + 32, 4210752, false);
+        // for (var tab : this.tabs)
+        //     tab.drawForeground(graphics, mouseX, mouseY);
     }
 
     @Override
-    protected void renderBg(GuiGraphics graphics, float partialTicks, int mouseX, int mouseY) {
-        graphics.blit(AbstractPipeGui.TEXTURE, this.leftPos, this.topPos + 32, 0, 0, 176, 171);
+    protected void renderBg(@Nonnull GuiGraphics graphics, float partialTicks, int mouseX, int mouseY) {
+        graphics.fill(leftPos, topPos, leftPos + 176, topPos + 171, 0xFFFFFFFF);
+        graphics.vLine(leftPos, topPos, topPos + 171, 0xFFFF0000);
+        graphics.vLine(leftPos + 176, topPos, topPos + 171, 0xFFFF0000);
+        graphics.hLine(leftPos + 3, leftPos + 176, topPos, 0xFFFF0000);
+        graphics.hLine(leftPos + 2, leftPos + 2, topPos + 1, 0xFFFF0000);
+        graphics.hLine(leftPos + 1, leftPos + 1, topPos + 2, 0xFFFF0000);
+        graphics.hLine(leftPos, leftPos + 176, topPos + 171, 0xFFFF0000);
+        // graphics.blit(AbstractPipeGui.TEXTURE, this.leftPos, this.topPos + 32, 0, 0, 176, 171);
 
-        for (var tab : this.tabs)
-            tab.draw(graphics);
+        // for (var tab : this.tabs)
+        //     tab.draw(graphics);
 
-        // draw the slots since we're using a blank ui
-        for (var slot : this.menu.slots) {
-            if (slot instanceof SlotItemHandler)
-                graphics.blit(AbstractPipeGui.TEXTURE, this.leftPos + slot.x - 1, this.topPos + slot.y - 1, 176, 62, 18, 18);
-        }
+        // // draw the slots since we're using a blank ui
+        // for (var slot : this.menu.slots) {
+        //     if (slot instanceof SlotItemHandler)
+        //         graphics.blit(AbstractPipeGui.TEXTURE, this.leftPos + slot.x - 1, this.topPos + slot.y - 1, 176, 62, 18, 18);
+        // }
     }
 
     @Override
