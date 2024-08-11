@@ -51,24 +51,24 @@ import java.util.stream.Stream;
 
 public class PipeBlockEntity extends BlockEntity implements MenuProvider, IPipeConnectable {
 
-        public final ItemStackHandler modules = new ItemStackHandler(1) {
-            @Override
-            public boolean isItemValid(int slot, ItemStack stack) {
-                var item = stack.getItem();
-                if (!(item instanceof IModule module))
-                    return false;
-                return PipeBlockEntity.this.streamModules().allMatch(m -> module.isCompatible(stack, PipeBlockEntity.this, m.getRight()) && m.getRight().isCompatible(m.getLeft(), PipeBlockEntity.this, module));
-            }
-
-            @Override
-            public int getSlotLimit(int slot) {
-                return 1;
-            }
-
-            @Override
-            protected void onContentsChanged(int slot) {
-                PipeBlockEntity.this.setChanged();
-            }
+        public final ItemStackHandler modules = new ItemStackHandler(3) {
+                @Override
+                public boolean isItemValid(int slot, ItemStack stack) {
+                    var item = stack.getItem();
+                    if (!(item instanceof IModule module))
+                        return false;
+                    return PipeBlockEntity.this.streamModules().allMatch(m -> module.isCompatible(stack, PipeBlockEntity.this, m.getRight()) && m.getRight().isCompatible(m.getLeft(), PipeBlockEntity.this, module));
+                }
+    
+                @Override
+                public int getSlotLimit(int slot) {
+                    return 1;
+                }
+    
+                @Override
+                protected void onContentsChanged(int slot) {
+                    PipeBlockEntity.this.setChanged();
+                }
         };
         public final Queue<NetworkLock> craftIngredientRequests = new LinkedList<>();
         public final List<Pair<BlockPos, ItemStack>> craftResultRequests = new ArrayList<>();
@@ -79,6 +79,7 @@ public class PipeBlockEntity extends BlockEntity implements MenuProvider, IPipeC
         private int priority;
         private final LazyOptional<PipeBlockEntity> lazyThis = LazyOptional.of(() -> this);
         private final Lazy<Integer> workRandomizer = Lazy.of(() -> level != null ? this.level.random.nextInt(200) : 0);
+        public Direction hitDirection;
 
         public PipeBlockEntity(BlockPos pos, BlockState state) {
             super(Registry.pipeBlockEntity, pos, state);
@@ -353,9 +354,10 @@ public class PipeBlockEntity extends BlockEntity implements MenuProvider, IPipeC
             Stream.Builder<Pair<ItemStack, IModule>> builder = Stream.builder();
             for (var i = 0; i < this.modules.getSlots(); i++) {
                 var stack = this.modules.getStackInSlot(i);
-                if (!stack.isEmpty() && stack.getItem() instanceof IModule module)
-                    builder.accept(Pair.of(stack, module));
+                    if (!stack.isEmpty() && stack.getItem() instanceof IModule module)
+                        builder.accept(Pair.of(stack, module));
             }
+    
             return builder.build();
         }
 

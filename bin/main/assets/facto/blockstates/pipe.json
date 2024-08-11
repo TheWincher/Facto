@@ -68,7 +68,18 @@
     },
     {
       "when": {
-        "south": "external"
+        "south": "external",
+        "module": "none"
+      },
+      "apply": {
+        "model": "facto:block/pipe_end_external",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "south": "external",
+        "module": "extract"
       },
       "apply": {
         "model": "facto:block/pipe_end_external",

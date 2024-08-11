@@ -3,7 +3,6 @@
 	"render_type": "cutout",
 	"textures": {
 		"0": "facto:block/pipe",
-		"1": "facto:block/energy_duct_connector",
 		"particle": "facto:block/pipe"
 	},
 	"elements": [

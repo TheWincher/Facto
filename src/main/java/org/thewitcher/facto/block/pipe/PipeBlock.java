@@ -29,6 +29,7 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -43,8 +44,10 @@ import org.thewitcher.facto.Registry;
 import org.thewitcher.facto.Utility;
 import org.apache.commons.lang3.tuple.Pair;
 import org.thewitcher.facto.item.modules.IModule;
+import org.thewitcher.facto.item.modules.extraction.ExtractModuleItem;
 import org.thewitcher.facto.network.PipeNetwork;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -54,6 +57,8 @@ import javax.annotation.Nonnull;
 public class PipeBlock extends BaseEntityBlock {
 
     public static final Map<Direction, EnumProperty<Connection>> DIRECTIONS = new HashMap<>();
+    public static final EnumProperty<ModuleState> MODULE_PROPERTY = EnumProperty.create("module", ModuleState.class);
+
     public static final Map<Pair<BlockState, BlockState>, VoxelShape> SHAPE_CACHE = new HashMap<>();
     public static final Map<Pair<BlockState, BlockState>, VoxelShape> COLL_SHAPE_CACHE = new HashMap<>();
     private static final VoxelShape CENTER_SHAPE = Block.box(5, 5, 5, 11, 11, 11);
@@ -67,14 +72,18 @@ public class PipeBlock extends BaseEntityBlock {
             .build();
 
     static {
-        for (var dir : Direction.values())
+        for (var dir : Direction.values()) {
             PipeBlock.DIRECTIONS.put(dir, EnumProperty.create(dir.getName(), Connection.class));
+        }
+           
     }
 
     public PipeBlock() {
         super(BlockBehaviour.Properties.of().strength(2).sound(SoundType.STONE).noOcclusion());
 
-        var state = this.defaultBlockState().setValue(BlockStateProperties.WATERLOGGED, false);
+        var state = this.defaultBlockState()
+            .setValue(BlockStateProperties.WATERLOGGED, false)
+            .setValue(MODULE_PROPERTY, ModuleState.NONE);
         for(var prop: PipeBlock.DIRECTIONS.values()) {
             state = state.setValue(prop, Connection.DISCONNECTED);
         }
@@ -84,8 +93,33 @@ public class PipeBlock extends BaseEntityBlock {
 
     @Override
     public @NotNull InteractionResult use(@Nonnull BlockState state, @Nonnull Level worldIn, @Nonnull BlockPos pos, @Nonnull Player player, @Nonnull InteractionHand handIn, @Nonnull BlockHitResult result) {
+        
+        var locHit = result.getLocation();
+        
+        var xBi = new BigDecimal(String.valueOf(locHit.x));
+        var xI = xBi.intValue();
+        var xDe = xBi.subtract(new BigDecimal(xI)).abs();
+
+        var yBi = new BigDecimal(String.valueOf(locHit.y));
+        var yI = yBi.intValue();
+        var yDe = yBi.subtract(new BigDecimal(yI)).abs();
+
+        var zBi = new BigDecimal(String.valueOf(locHit.z));
+        var zI = zBi.intValue();
+        var zDe = zBi.subtract(new BigDecimal(zI)).abs();
+
+        var vec = new Vec3(xDe.doubleValue(), yDe.doubleValue(), zDe.doubleValue());
+
+        Direction pipeDirection = null;
+        for (var dir : Direction.values()) {
+            var bounds = DIR_SHAPES.get(dir).bounds();
+            if(bounds.minX <= vec.x && bounds.maxX >= vec.x && bounds.minY <= vec.y && bounds.maxY >= vec.y && bounds.minZ <= vec.z && bounds.maxZ >= vec.z) {
+                pipeDirection = dir;
+            }
+        }
+
         var tile = Utility.getBlockEntity(PipeBlockEntity.class, worldIn, pos);
-        if (tile == null)
+        if (tile == null || pipeDirection == null || state.getValue(DIRECTIONS.get(pipeDirection)) != Connection.EXTERNAL)
             return InteractionResult.PASS;
         if (!tile.canHaveModules())
             return InteractionResult.PASS;
@@ -110,6 +144,7 @@ public class PipeBlock extends BaseEntityBlock {
     protected void createBlockStateDefinition(@Nonnull StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(PipeBlock.DIRECTIONS.values().toArray(new EnumProperty[0]));
         builder.add(BlockStateProperties.WATERLOGGED);
+        builder.add(PipeBlock.MODULE_PROPERTY);
     }
 
     @Override
@@ -214,6 +249,15 @@ public class PipeBlock extends BaseEntityBlock {
                 type = Connection.BLOCKED;
             state = state.setValue(prop, type);
         }
+
+        var tile = world.getBlockEntity(pos);
+        if (tile instanceof PipeBlockEntity) {
+            var pipeTile = (PipeBlockEntity) tile;
+            if (pipeTile.modules.getStackInSlot(0).getItem() instanceof ExtractModuleItem) {
+                state = state.setValue(PipeBlock.MODULE_PROPERTY, ModuleState.EXTRACT);
+            }
+        }
+        
         return state;
     }
 
